@@ -1,0 +1,2 @@
+/subsystem=datasources/data-source=ticketMonsterDatasource:write-attribute(name=spy, value=true)
+/subsystem=logging/logger=jboss.jdbc.spy/:add(level=DEBUG)
