@@ -17,7 +17,16 @@ if [ -z "$JBOSS_HOME" ]; then
 fi
 
 if [ -e "$JBOSS_HOME" ]; then
-    echo "$JBOSS_HOME exists, will not overwrite it. Remove it manually!" 1>&2
+    if [ X$JBOSS_FORCE_INSTALL = XTrue ]; then
+	rm -rf $JBOSS_HOME
+    else
+        echo "$JBOSS_HOME exists, will not override it. Remove it manually!" 1>&2
+        error=1
+    fi
+fi
+
+if [ -n "$JBossPatch" -a ! -f "$JBossPatch" ]; then
+   	echo "Patch $JBossPatch doesn't exist!" 1>&2
     error=1
 fi
 
@@ -25,7 +34,14 @@ test $error = 0 || exit $error
 
 TmpInstall=${JBOSS_HOME}_Tmp$$
 
-unzip -d $TmpInstall $JBossPackage
+unzip -d $TmpInstall $JBossPackage >/dev/null
 mv $TmpInstall/* $JBOSS_HOME
 rm -r $TmpInstall
 
+if [ -n "$JBossPatch" ]; then
+    echo "Install patch $JBossPatch" 1>&2
+	$JBOSS_HOME/bin/jboss-cli.sh "patch apply $JBossPatch"
+    error=$?
+fi
+
+exit $error
