@@ -1,0 +1,1 @@
+echo "JAVA_OPTS=\"\$JAVA_OPTS -javaagent:${ELASTIC_APM_AGENT_LOCATION} -Delastic.apm.service_name=HangExample -Delastic.apm.server_url=http://localhost:8200 -Delastic.apm.application_packages=at.gepardec.* -Delastic.apm.trace_methods=at.gepardec.*\"" >> $JBOSS_HOME/bin/standalone.conf
