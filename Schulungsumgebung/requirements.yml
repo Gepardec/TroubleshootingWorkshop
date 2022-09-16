@@ -1,0 +1,7 @@
+---
+collections:
+  - name: middleware_automation.redhat_csp_download
+  - name: community.general
+  - name: ansible.posix
+  - name: community.docker
+  - name: community.crypto

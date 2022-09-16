@@ -1,0 +1,66 @@
+# Schulungsumgebung in AWS
+
+Wir bauen X Schulungsumgebungen in AWS auf.
+
+Es wird terraform verwendet, um eine isolierte Umgebung zu erstellen.
+
+Danach wird ansible verwendet, um die VMs für das Training einzurichten.
+
+## Terraform
+
+Für den Aufbau der Schulungsumgebung gibt es ein eigenes https://github.com/Gepardec/train[Git Repository] und https://github.com/Gepardec/train/pkgs/container/train[Images] welches Terraform verwendet.
+https://gepardec.github.io/train/[Github Pages] liefert die Dokumentation.
+
+Ein passender ami_name kann in https://eu-central-1.console.aws.amazon.com/ec2/home?region=eu-central-1#Images:visibility=public-images;search=:fedora;v=3;$case=tags:false%5C,client:false;$regex=tags:false%5C,client:false[aws] gefunden werden. Achtung wahrscheinlich muss auch ami_owners angepasst werden.
+
+
+### Erstellen der AWS Rechner
+```
+vi variables.tfvars
+podman run --rm -it -v $HOME/.aws:/root/.aws:ro -v $(pwd)/:/opt/train/workdir ghcr.io/gepardec/train:latest apply
+```
+
+### Destroy AWS Rechner
+```
+podman run --rm -it -v $HOME/.aws:/root/.aws:ro -v $(pwd)/:/opt/train/workdir ghcr.io/gepardec/train:latest destroy
+```
+
+## Konfigurieren der Rechner mit Ansible
+
+Wir verwenden https://github.com/ansible-middleware/redhat-csp-download[redhat-csp-download] für den Download von EAP.
+Diese collection kann mit ansible-galaxy installiert werden:
+```
+ansible-galaxy collection install -r requirements.yml
+```
+
+In das `inventory` muss dann noch folgendes ergänzt werden:
+
+```
+[all:vars]
+redhat_csp_username=xxx
+redhat_csp_password=xxx
+webtop_password=xxx
+```
+Danach kann das ansible-playbook ausgeführt werden.
+```
+ansible-playbook -i troubleshooting-workshop/inventory --tags execute playbook.yaml
+```
+wobei statt `troubleshooting-workshop` der in `variables.tfvars` angegebene Wert für `resource_prefix` einzusetzen ist.
+
+## Verbinden mit Webtop
+
+Auf Port 3000 jedes Rechners läuft ein Web-GUI z.B: http://3.68.193.54:3000/. Siehe Datei `inventory` für IP-Adressen
+
+
+## Verbinden mit SSH
+
+Z.B:
+```
+ssh fedora@3.71.32.5
+```
+Lokaler Public-Key sollte am Host sein.
+
+SSH von Webtop zum Host:
+```
+ssh localhost
+``` 
