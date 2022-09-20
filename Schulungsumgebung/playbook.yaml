@@ -2,6 +2,7 @@
 - name: Install Troubleshooting Training
   hosts: all
   gather_facts: true
+  any_errors_fatal: true
   vars:
       jboss_version: 7.2.2
       training_home: ../
@@ -184,6 +185,7 @@
         - PORT_OFFSET=0
         - export FEATURES="apm"
         - export ELASTIC_APM_AGENT_LOCATION={{ ansible_env.HOME }}/elastic-apm/elastic-apm-agent-1.12.0.jar
+        - JBOSS_OPTS="-Djava.util.logging.manager=org.jboss.logmanager.LogManager"
       ansible.builtin.lineinfile:
         path: "{{ ansible_env.HOME }}/.eap7rc"
         line: "{{ item }}"
