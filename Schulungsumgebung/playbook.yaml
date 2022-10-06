@@ -1,0 +1,342 @@
+---
+- name: Install Troubleshooting Training
+  hosts: all
+  gather_facts: true
+  any_errors_fatal: true
+  vars:
+      jboss_version: 7.2.2
+      training_home: ../
+  tasks:
+    - name: Disable SELinux
+      tags: execute
+      become: true
+      ansible.posix.selinux:
+        state: disabled
+
+    - name: Install needed packages
+      tags: execute
+      become: true
+      ansible.builtin.dnf: name=docker-compose,unzip,git,time,bc,chromium,gedit,net-tools,java-11-openjdk-devel.x86_64,pip,xorg-x11-xauth,webkit2gtk3 state=installed
+
+    - name: Install python dependencies
+      tags: execute
+      ansible.builtin.pip:
+        name:
+          - lxml # Needed by redhat_csp_download
+          - requests # Needed by redhat_csp_download
+          - docker-py # Needed by docker_container
+
+    - name: Create directories
+      tags: execute
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: directory
+        mode: '0755'
+      with_items:
+        - bin
+        - Downloads
+        - webtop/Desktop
+        - webtop/.config
+        - elastic-apm
+
+    - name: Ensure group "docker" exists
+      tags: execute
+      become: true
+      ansible.builtin.group:
+        name: docker
+        state: present
+
+    - name: Add the user to docker group
+      tags: execute
+      become: true
+      ansible.builtin.user:
+        name: "{{ linux_user }}"
+        groups: docker
+        append: true
+
+    - name: Install docker
+      tags: execute
+      become: true
+      ansible.builtin.dnf: name=docker state=installed
+
+    - name: Start and enable docker
+      tags: execute
+      become: true
+      ansible.builtin.systemd:
+        name: docker
+        state: started
+        enabled: true
+
+    - name: Generate SSH key
+      tags: execute
+      community.crypto.openssh_keypair:
+        path: "~/.ssh/id_rsa"
+        type: rsa
+
+    - name: Allow local user to login
+      tags: execute
+      ansible.posix.authorized_key:
+        user: "{{ linux_user }}"
+        state: present
+        key: "{{ lookup('file', '~/.ssh/id_rsa.pub') }}"
+
+    - name: Fetch the keyfile from remote server
+      tags: execute
+      ansible.builtin.fetch:
+        src: "~/.ssh/id_rsa.pub"
+        dest: "/tmp/remote-{{ inventory_hostname }}-id_rsa.pub"
+        flat: true
+
+    - name: Allow remote user to login remote
+      tags: execute
+      ansible.posix.authorized_key:
+        user: "{{ linux_user }}"
+        state: present
+        key: "{{ lookup('file','/tmp/remote-{{inventory_hostname}}-id_rsa.pub')}}"
+
+    - name: Copy ssh-config to the webtop directory
+      tags: execute
+      ansible.builtin.copy:
+        src: .ssh
+        dest: webtop/
+        remote_src: true
+        mode: 0700
+
+    - name: Create ssh config file
+      tags: execute
+      ansible.builtin.copy:
+        dest: "webtop/.ssh/config"
+        mode: 0600
+        content: |
+          Host localhost
+            Hostname localhost
+            User "{{ linux_user }}"
+            StrictHostKeyChecking no
+
+    - name: Download JBoss EAP Zip
+      tags: execute
+      middleware_automation.redhat_csp_download.redhat_csp_download:
+        username: "{{ redhat_csp_username }}"
+        password: "{{ redhat_csp_password }}"
+        url: "https://access.redhat.com/jbossnetwork/restricted/softwareDownload.html?softwareId=99481"
+        dest: "Downloads/jboss-eap-{{ jboss_version }}.zip" # Ja hier muss man den Filenamen angeben.
+
+    - name: Clone Troubleshooting Workshop
+      tags: execute
+      ansible.builtin.git:
+        repo: https://github.com/Gepardec/TroubleshootingWorkshop.git
+        dest: "{{ ansible_env.HOME }}/TroubleshootingWorkshop"
+        version: master
+
+    - name: Copy Elastic APM File
+      tags: execute
+      ansible.builtin.template:
+        src: templates/docker-compose.yml
+        dest: elastic-apm/
+        mode: 0644
+
+    - name: Start Elastic APM
+      become: true
+      tags: execute
+      community.docker.docker_compose:
+        project_src: elastic-apm
+        state: present
+
+    - name: Download elastic-apm-agent
+      tags: execute
+      ansible.builtin.get_url:
+        url: https://repo1.maven.org/maven2/co/elastic/apm/elastic-apm-agent/1.12.0/elastic-apm-agent-1.12.0.jar
+        dest: "{{ ansible_env.HOME }}/elastic-apm/elastic-apm-agent-1.12.0.jar"
+
+    - name: Download MAT
+      tags: execute
+      ansible.builtin.get_url:
+        url: https://www.eclipse.org/downloads/download.php?file=/mat/1.13.0/rcp/MemoryAnalyzer-1.13.0.20220615-linux.gtk.x86_64.zip&r=1
+        dest: "{{ ansible_env.HOME }}/Downloads/mat.zip"
+        timeout: 120
+
+    - name: Extract mat.zip
+      tags: execute
+      ansible.builtin.unarchive:
+        src: "{{ ansible_env.HOME }}/Downloads/mat.zip"
+        dest: "{{ ansible_env.HOME }}/"
+        remote_src: true
+
+    - name: Download JMC
+      tags: execute
+      ansible.builtin.get_url:
+        url: https://github.com/AdoptOpenJDK/openjdk-jmc-overrides/releases/download/8.1.0/org.openjdk.jmc-8.1.0-linux.gtk.x86_64.tar.gz
+        dest: "{{ ansible_env.HOME }}/Downloads/jmc.tar.gz"
+        timeout: 120
+
+    - name: Extract JMC
+      tags: execute
+      ansible.builtin.unarchive:
+        src: "{{ ansible_env.HOME }}/Downloads/jmc.tar.gz"
+        dest: "{{ ansible_env.HOME }}/"
+        remote_src: true
+
+    - name: Add eap7rc configuration
+      tags: execute
+      loop:
+        - JBOSS_RELEASE_NAME=jboss-eap-{{ jboss_version }}
+        - JBOSS_HOME={{ ansible_env.HOME }}/${JBOSS_RELEASE_NAME}
+        - export JBossPackage={{ ansible_env.HOME }}/Downloads/${JBOSS_RELEASE_NAME}.zip
+        - PORT_OFFSET=0
+        - export FEATURES="apm"
+        - export ELASTIC_APM_AGENT_LOCATION={{ ansible_env.HOME }}/elastic-apm/elastic-apm-agent-1.12.0.jar
+        - JBOSS_OPTS="-Djava.util.logging.manager=org.jboss.logmanager.LogManager"
+      ansible.builtin.lineinfile:
+        path: "{{ ansible_env.HOME }}/.eap7rc"
+        line: "{{ item }}"
+        create: true
+
+    - name: Download JBoss Tools
+      tags: execute
+      ansible.builtin.get_url:
+        url: https://raw.githubusercontent.com/Gepardec/JBSS/master/bin/jboss7
+        dest: "{{ ansible_env.HOME }}/bin/eap7"
+        mode: 0770
+
+    - name: Add alias
+      tags: execute
+      loop:
+        - alias cdl="cd {{ ansible_env.HOME }}/jboss-eap-{{ jboss_version }}/standalone/log/"
+        - alias cdc="cd {{ ansible_env.HOME }}/jboss-eap-{{ jboss_version }}/standalone/configuration/"
+        - alias cdd="cd {{ ansible_env.HOME }}/jboss-eap-{{ jboss_version }}/standalone/deployments/"
+        - alias cdb="cd {{ ansible_env.HOME }}/jboss-eap-{{ jboss_version }}/bin/"
+      ansible.builtin.lineinfile:
+        path: "{{ ansible_env.HOME }}/.bashrc"
+        line: "{{ item }}"
+
+    - name: Run Webtop
+      tags: execute
+      community.docker.docker_container:
+        name: webtop
+        image: lscr.io/linuxserver/webtop:fedora-xfce
+        state: started
+        env:
+          PUID: "1000"
+          PGID: "1000"
+          TZ: "Europe/Vienna"
+          SUBFOLDER: "/"
+          KEYBOARD: "de-de-qwertz"
+        volumes:
+          - /home/{{ linux_user }}/webtop:/config
+          - /var/run/docker.sock:/var/run/docker.sock
+          - /:/host
+        security_opts:
+          - "seccomp:unconfined"
+        shm_size: 1G
+        network_mode: host
+
+    - name: Change Password in Webtop
+      ansible.builtin.shell: docker exec -it webtop /bin/sh -c "echo abc:{{ webtop_password }} | sudo chpasswd"
+
+    - name: Create desktop shortcut file explorer to home VM via Link
+      tags: execute
+      ansible.builtin.copy:
+        dest: "webtop/Desktop/home_training.desktop"
+        mode: '0755'
+        content: |
+          [Desktop Entry]
+          Version=1.0
+          Type=Link
+          Name=Home Training
+          Comment=Users Home
+          Icon=user-bookmarks
+          URL=/host/home/{{ linux_user }}
+
+    - name: Create desktop shortcut file explorer to home VM via sftp
+      tags: execute
+      ansible.builtin.copy:
+        dest: "webtop/Desktop/home_vm.desktop"
+        mode: '0755'
+        content: |
+          [Desktop Entry]
+          Version=1.0
+          Type=Application
+          Name=Home VM
+          Exec=thunar sftp://localhost/home/{{ linux_user }}
+          Icon=go-home
+          Path=
+          Terminal=false
+          StartupNotify=false
+
+    - name: Create desktop shortcut terminal to VM
+      tags: execute
+      ansible.builtin.copy:
+        dest: "webtop/Desktop/terminal_vm.desktop"
+        mode: '0755'
+        content: |
+          [Desktop Entry]
+          Version=1.0
+          Type=Application
+          Name=Terminal VM
+          Exec=ssh -Y localhost
+          Icon=utilities-terminal
+          Path=
+          Terminal=true
+          StartupNotify=false
+
+    - name: Create desktop shortcut JMC
+      tags: execute
+      ansible.builtin.copy:
+        dest: "webtop/Desktop/JMC.desktop"
+        mode: '0755'
+        content: |
+          [Desktop Entry]
+          Version=1.0
+          Type=Application
+          Name=JMC
+          Comment=Java Mission Control
+          Exec=ssh -Y {{ linux_user }}@localhost '/home/fedora/JDK\ Mission\ Control/jmc'
+          Icon=application-x-executable
+          Path=
+          Terminal=false
+          StartupNotify=false
+
+    - name: Create desktop shortcut MAT
+      tags: execute
+      ansible.builtin.copy:
+        dest: "webtop/Desktop/MAT.desktop"
+        mode: '0755'
+        content: |
+          [Desktop Entry]
+          Version=1.0
+          Type=Application
+          Name=MAT
+          Comment=MAT
+          Exec=ssh -Y {{ linux_user }}@localhost '/home/fedora/mat/MemoryAnalyzer'
+          Icon=application-x-executable
+          Path=
+          Terminal=false
+          StartupNotify=false
+
+    - name: Set default application for pdf
+      tags: execute
+      ansible.builtin.copy:
+        dest: "webtop/.config/mimeapps.list"
+        mode: '0600'
+        content: |
+          [Added Associations]
+          application/pdf=firefox.desktop;
+          application/octet-stream=org.xfce.mousepad.desktop;
+          application/xml=org.xfce.mousepad.desktop;
+
+    - name: Create README
+      tags: execute
+      ansible.builtin.copy:
+        dest: "webtop/Desktop/README.txt"
+        mode: '0644'
+        content: |
+         Eigenheiten der Umgebung:
+         Der Dektop läuft innerhalb eines Docker Containers in der VM
+
+         Icons:
+            "Home VM": Anzeigen des HOME-Verzeichnisses der VM
+            "Terminal VM": SSH-Verbindung zur VM
+
+         Mounts im Container
+           /host innerhalb des Containers zeigt auf / der VM
+           /host/home/{{ linux_user }} innerhalb des Containers ist daher das HOME-Verzeichnis des VM-Users
