@@ -16,7 +16,7 @@
     - name: Install needed packages
       tags: execute
       become: true
-      ansible.builtin.dnf: name=docker-compose,unzip,git,time,bc,chromium,gedit,net-tools,java-11-openjdk-devel.x86_64,pip,xorg-x11-xauth,webkit2gtk3 state=installed
+      ansible.builtin.dnf: name=docker-compose,unzip,git,time,bc,chromium,gedit,net-tools,java-17-openjdk-devel.x86_64,pip,xorg-x11-xauth,webkit2gtk3 state=installed
 
     - name: Install python dependencies
       tags: execute
@@ -151,7 +151,7 @@
     - name: Download MAT
       tags: execute
       ansible.builtin.get_url:
-        url: https://www.eclipse.org/downloads/download.php?file=/mat/1.13.0/rcp/MemoryAnalyzer-1.13.0.20220615-linux.gtk.x86_64.zip&r=1
+        url: https://www.eclipse.org/downloads/download.php?file=/mat/1.15.0/rcp/MemoryAnalyzer-1.15.0.20231206-linux.gtk.x86_64.zip&r=1
         dest: "{{ ansible_env.HOME }}/Downloads/mat.zip"
         timeout: 120
 
@@ -165,7 +165,7 @@
     - name: Download JMC
       tags: execute
       ansible.builtin.get_url:
-        url: https://github.com/AdoptOpenJDK/openjdk-jmc-overrides/releases/download/8.1.0/org.openjdk.jmc-8.1.0-linux.gtk.x86_64.tar.gz
+        url: https://github.com/adoptium/jmc-build/releases/download/9.0.0/org.openjdk.jmc-9.0.0-linux.gtk.x86_64.tar.gz
         dest: "{{ ansible_env.HOME }}/Downloads/jmc.tar.gz"
         timeout: 120
 
