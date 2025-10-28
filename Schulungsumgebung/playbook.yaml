@@ -4,7 +4,7 @@
   gather_facts: true
   any_errors_fatal: true
   vars:
-      jboss_version: 7.4.0
+      jboss_version: 7.2.2
       training_home: ../
   tasks:
     - name: Disable SELinux
@@ -16,7 +16,7 @@
     - name: Install needed packages
       tags: execute
       become: true
-      ansible.builtin.dnf: name=docker-compose,unzip,git,time,bc,chromium,gedit,net-tools,java-17-openjdk-devel.x86_64,pip,xorg-x11-xauth,webkit2gtk3 state=installed
+      ansible.builtin.dnf: name=docker-compose,unzip,git,time,bc,chromium,gedit,net-tools,java-17-openjdk-devel.x86_64,java-11-openjdk-devel.x86_64,pip,xorg-x11-xauth,webkit2gtk3 state=installed
 
     - name: Install python dependencies
       tags: execute
@@ -187,6 +187,7 @@
       loop:
         - JBOSS_RELEASE_NAME=jboss-eap-{{ jboss_version }}
         - JBOSS_HOME={{ ansible_env.HOME }}/${JBOSS_RELEASE_NAME}
+        - export JAVA_HOME=/usr/lib/jvm/java-11-openjdk
         - export JBossPackage={{ ansible_env.HOME }}/Downloads/${JBOSS_RELEASE_NAME}.zip
         - PORT_OFFSET=0
         - export FEATURES="apm"
