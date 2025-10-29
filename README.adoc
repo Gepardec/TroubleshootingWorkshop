@@ -1,0 +1,7 @@
+= Java/JBoss/Quarkus Troubleshooting Workshop
+
+Die Schulungsunterlagen befinden sich in https://miro.com/app/board/uXjVPVf8rrk=/[Miro]. Für jeden Workshop wird eine Kopie vom Miro Board angelegt.
+
+Eine Anleitung wie die Schulungsumgebung in AWS erstellt wird, ist  link:Schulungsumgebung/README.adoc[hier] beschrieben.
+
+Dieser Workshop bietet die Grundlage für https://www.gepardec.com/jboss-eap-training-troubleshooting/
