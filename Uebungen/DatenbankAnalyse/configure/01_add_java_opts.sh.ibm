@@ -1,1 +1,0 @@
-echo "JAVA_OPTS=\"\$JAVA_OPTS -Xdump:heap\"" >> $JBOSS_HOME/bin/standalone.conf
