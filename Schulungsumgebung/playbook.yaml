@@ -5,7 +5,6 @@
   any_errors_fatal: true
   vars:
       jboss_version: 7.2.2
-      training_home: ../
   tasks:
     - name: Disable SELinux
       tags: execute
@@ -22,8 +21,6 @@
       tags: execute
       ansible.builtin.pip:
         name:
-          - lxml # Needed by redhat_csp_download
-          - requests # Needed by redhat_csp_download
           - docker-py # Needed by docker_container
 
     - name: Create directories
@@ -113,18 +110,10 @@
             User "{{ linux_user }}"
             StrictHostKeyChecking no
 
-    - name: Download JBoss EAP Zip
+    - name: Upload JBoss EAP Zip # muss vorher heruntergeladen werden von: https://access.redhat.com/jbossnetwork/restricted/listSoftware.html?downloadType=distributions&product=appplatform
       tags: execute
-      middleware_automation.redhat_csp_download.redhat_csp_download:
-        username: "{{ redhat_csp_username }}"
-        password: "{{ redhat_csp_password }}"
-        url: "https://access.redhat.com/jbossnetwork/restricted/softwareDownload.html?softwareId=99481"
-        dest: "Downloads/jboss-eap-{{ jboss_version }}.zip" # Ja hier muss man den Filenamen angeben.
-
-    - name: Upload JBoss EAP Zip
-      tags: execute-not
       ansible.builtin.copy:
-        src: "/Users/herbert.wirnsberger/Downloads/jboss-eap-{{ jboss_version }}.zip"
+        src: "downloads/jboss-eap-{{ jboss_version }}.zip"
         dest: "Downloads/jboss-eap-{{ jboss_version }}.zip"
 
     - name: Clone Troubleshooting Workshop

@@ -59,8 +59,6 @@ function train_apply_postprocess {
   cat <<EOF >> $inventory
 
 [all:vars]
-redhat_csp_username=${redhat_csp_username}
-redhat_csp_password=${redhat_csp_password}
 webtop_password=${webtop_password}
 linux_user=${ANSIBLE_USER}
 EOF

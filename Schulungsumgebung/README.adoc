@@ -27,25 +27,9 @@ podman run --rm -it -v $HOME/.aws:/root/.aws:ro -v $(pwd)/:/opt/train/workdir gh
 ----
 
 == Konfigurieren der Rechner mit Ansible
-
-Wir verwenden https://github.com/ansible-middleware/redhat-csp-download[redhat-csp-download] für den Download von EAP.
-Diese collection kann mit ansible-galaxy installiert werden:
 [source,shell]
 ----
 ansible-galaxy collection install -r requirements.yml
-----
-
-In das `inventory` muss dann noch folgendes ergänzt werden:
-
-----
-[all:vars]
-redhat_csp_username=xxx
-redhat_csp_password=xxx
-webtop_password=xxx
-----
-Danach kann das ansible-playbook ausgeführt werden.
-[source,shell]
-----
 ansible-playbook -i troubleshooting-workshop/inventory --tags execute playbook.yaml
 ----
 
