@@ -133,6 +133,15 @@
         repo: https://github.com/Gepardec/TroubleshootingWorkshop.git
         dest: "{{ ansible_env.HOME }}/TroubleshootingWorkshop"
         version: master
+### TODO: Muss noch getestet werden. Auch idempotency mit Step clone davor.
+    - name: Clean Cloned Troubleshooting Workshop Examples
+      tags: execute
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: absent
+      with_items:
+        - "{{ ansible_env.HOME }}/TroubleshootingWorkshop/Uebungen/SlowQuarkusExample/src"
+        - "{{ ansible_env.HOME }}/TroubleshootingWorkshop/Uebungen/SlowQuarkusExample/pom.xml"
 
     - name: Copy Elastic APM File
       tags: execute
