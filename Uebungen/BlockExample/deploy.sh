@@ -1,6 +1,6 @@
 #!/bin/sh
 
-INSTANZ=eap7
+INSTANZ=eap
 
 echo -n "Verwende "
 $INSTANZ status | grep JBOSS_HOME

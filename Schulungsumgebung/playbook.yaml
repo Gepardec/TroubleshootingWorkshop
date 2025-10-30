@@ -4,7 +4,7 @@
   gather_facts: true
   any_errors_fatal: true
   vars:
-      jboss_version: 7.2.2
+      jboss_version: 8.1.0
   tasks:
     - name: Disable SELinux
       tags: execute
@@ -130,6 +130,7 @@
         state: absent
       with_items:
         - "{{ ansible_env.HOME }}/TroubleshootingWorkshop/Uebungen/SlowQuarkusExample/slow-quarkus-example"
+        - "{{ ansible_env.HOME }}/TroubleshootingWorkshop/Uebungen/BlockExample/jaxrs-ws"
 
     - name: Copy Elastic APM File
       tags: execute
@@ -179,19 +180,19 @@
         dest: "{{ ansible_env.HOME }}/"
         remote_src: true
 
-    - name: Add eap7rc configuration
+    - name: Add eaprc configuration
       tags: execute
       loop:
         - JBOSS_RELEASE_NAME=jboss-eap-{{ jboss_version }}
         - JBOSS_HOME={{ ansible_env.HOME }}/${JBOSS_RELEASE_NAME}
-        - export JAVA_HOME=/usr/lib/jvm/java-11-openjdk
+        - export JAVA_HOME=/usr/lib/jvm/java-17-openjdk
         - export JBossPackage={{ ansible_env.HOME }}/Downloads/${JBOSS_RELEASE_NAME}.zip
         - PORT_OFFSET=0
         - export FEATURES="apm"
         - export ELASTIC_APM_AGENT_LOCATION={{ ansible_env.HOME }}/elastic-apm/elastic-apm-agent-1.51.0.jar
         - JBOSS_OPTS="-Djava.util.logging.manager=org.jboss.logmanager.LogManager"
       ansible.builtin.lineinfile:
-        path: "{{ ansible_env.HOME }}/.eap7rc"
+        path: "{{ ansible_env.HOME }}/.eaprc"
         line: "{{ item }}"
         create: true
 
@@ -199,7 +200,7 @@
       tags: execute
       ansible.builtin.get_url:
         url: https://raw.githubusercontent.com/Gepardec/JBSS/master/bin/jboss7
-        dest: "{{ ansible_env.HOME }}/bin/eap7"
+        dest: "{{ ansible_env.HOME }}/bin/eap"
         mode: 0770
 
     - name: Add alias
