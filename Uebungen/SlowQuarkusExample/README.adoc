@@ -17,5 +17,5 @@ sleep 2
 
 [source,shell]
 ----
-pkill -lf slow-quarkus-example 
+pkill -f slow-quarkus-example
 ----
