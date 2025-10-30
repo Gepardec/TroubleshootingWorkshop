@@ -122,6 +122,8 @@
         repo: https://github.com/Gepardec/TroubleshootingWorkshop.git
         dest: "{{ ansible_env.HOME }}/TroubleshootingWorkshop"
         version: main
+        update: true
+        force: true
 
     - name: Clean Cloned Troubleshooting Workshop Examples
       tags: execute
@@ -237,7 +239,10 @@
         network_mode: host
 
     - name: Change Password in Webtop
-      ansible.builtin.shell: docker exec -it webtop /bin/sh -c "echo abc:{{ webtop_password }} | sudo chpasswd"
+      tags: execute
+      ansible.builtin.shell: docker exec webtop /bin/sh -c "echo abc:{{ webtop_password }} | sudo chpasswd"
+      changed_when: false
+      failed_when: false
 
     - name: Create desktop shortcut file explorer to home VM via Link
       tags: execute
