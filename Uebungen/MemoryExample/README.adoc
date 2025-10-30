@@ -1,33 +1,39 @@
 == Problembeschreibung
 
-Wir verwenden die Anwendung ticket2rock. Eine Zeitlang geht es ganz gut, aber dann
-wird die Anwendung immer langsamer bis sie praktisch nicht mehr verwendbar ist.
-Wir haben die Zeiten für jeweils 50 Aufrufe gemessen. Siehe Datei example_output.txt.
-Die Zeiten sind in Sekunden. Die Ausgaben sind:
-
-----
-..................................................3.634967779
-..................................................1.614525342
-..................................................1.750184408
-..................................................1.562067344
-..................................................1.454874770
-..................................................1.392446691
-...
-..................................................5.675608750
-..................................................5.578944600
-..................................................6.174377373
-..................................................8.098661220
-..................................................10.781695918
-..................................................11.295126673
-..................................................12.895158173
-..................................................19.843562625
-..................................................18.054468985
-..................................................20.944341844
-----
+Die Applikation läuft zunächst stabil, aber nach einiger Zeit wird sie immer langsamer.
+Schließlich stürzt sie mit einem OutOfMemoryError ab.
+Die Probleme treten besonders auf, wenn der `/leak` Endpoint häufig aufgerufen wird.
 
 == Schritte zum Reproduzieren
+
 [source,shell]
 ----
-./deploy.sh
+java -Xmx100m -jar configure/memory-leak-demo-1.0.0-SNAPSHOT-runner.jar &
+sleep 2
 ./run.sh
+----
+
+Beobachte die Memory-Nutzung über die Zeit. Nach mehreren Aufrufen wird der Speicher kontinuierlich wachsen.
+
+== Applikation stoppen
+
+[source,shell]
+----
+pkill -f memory-leak-demo
+----
+
+== Endpoints
+
+* `GET /leak` - Triggert den Memory Leak
++
+[source,shell]
+----
+curl http://localhost:8080/leak
+----
+
+* `GET /leak/status` - Zeigt aktuellen Memory-Status
++
+[source,shell]
+----
+curl http://localhost:8080/leak/status
 ----

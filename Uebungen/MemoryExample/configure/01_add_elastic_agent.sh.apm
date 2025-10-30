@@ -1,1 +1,0 @@
-echo "JAVA_OPTS=\"\$JAVA_OPTS -javaagent:${ELASTIC_APM_AGENT_LOCATION} -Delastic.apm.service_name=MemoryExample -Delastic.apm.server_url=http://localhost:8200 -Delastic.apm.application_packages=de.ejb3buch.* -Delastic.apm.trace_methods=de.ejb3buch.*\"" >> $JBOSS_HOME/bin/standalone.conf

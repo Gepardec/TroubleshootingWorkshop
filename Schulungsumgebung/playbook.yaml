@@ -121,8 +121,8 @@
       ansible.builtin.git:
         repo: https://github.com/Gepardec/TroubleshootingWorkshop.git
         dest: "{{ ansible_env.HOME }}/TroubleshootingWorkshop"
-        version: master
-### TODO: Muss noch getestet werden. Auch idempotency mit Step clone davor.
+        version: main
+
     - name: Clean Cloned Troubleshooting Workshop Examples
       tags: execute
       ansible.builtin.file:
@@ -131,6 +131,7 @@
       with_items:
         - "{{ ansible_env.HOME }}/TroubleshootingWorkshop/Uebungen/SlowQuarkusExample/slow-quarkus-example"
         - "{{ ansible_env.HOME }}/TroubleshootingWorkshop/Uebungen/BlockExample/jaxrs-ws"
+        - "{{ ansible_env.HOME }}/TroubleshootingWorkshop/Uebungen/MemoryExample/memory-leak-demo"
 
     - name: Copy Elastic APM File
       tags: execute
@@ -218,7 +219,7 @@
       tags: execute
       community.docker.docker_container:
         name: webtop
-        image: lscr.io/linuxserver/webtop:fedora-xfce
+        image: lscr.io/linuxserver/webtop:fedora-xfce-01b301b8-ls193
         state: started
         env:
           PUID: "1000"
