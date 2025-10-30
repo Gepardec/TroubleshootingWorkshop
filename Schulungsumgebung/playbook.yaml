@@ -129,8 +129,7 @@
         path: "{{ item }}"
         state: absent
       with_items:
-        - "{{ ansible_env.HOME }}/TroubleshootingWorkshop/Uebungen/SlowQuarkusExample/src"
-        - "{{ ansible_env.HOME }}/TroubleshootingWorkshop/Uebungen/SlowQuarkusExample/pom.xml"
+        - "{{ ansible_env.HOME }}/TroubleshootingWorkshop/Uebungen/SlowQuarkusExample/slow-quarkus-example"
 
     - name: Copy Elastic APM File
       tags: execute
