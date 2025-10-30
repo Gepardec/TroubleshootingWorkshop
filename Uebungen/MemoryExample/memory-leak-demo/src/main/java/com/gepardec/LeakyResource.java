@@ -31,7 +31,7 @@ public class LeakyResource {
         long usedMemory = (runtime.totalMemory() - runtime.freeMemory()) / (1024 * 1024);
         long maxMemory = runtime.maxMemory() / (1024 * 1024);
         
-        return String.format("Leaked objects: %d (≈%d MB)\nUsed memory: %d MB\nMax memory: %d MB\n",
+        return String.format("Leaked objects: %d (%d MB)\nUsed memory: %d MB\nMax memory: %d MB\n",
                 cacheService.size(),
                 cacheService.size() * 10,
                 usedMemory,
