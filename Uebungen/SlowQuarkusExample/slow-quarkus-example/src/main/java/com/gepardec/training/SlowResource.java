@@ -21,7 +21,6 @@ public class SlowResource {
         LOG.info(String.format("Request #%d started", currentRequest));
         
         try {
-            // Simulate slow processing - this will cause threads to queue up
             Thread.sleep(2000); // 2 seconds
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
