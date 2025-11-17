@@ -15,7 +15,7 @@
     - name: Install needed packages
       tags: execute
       become: true
-      ansible.builtin.dnf: name=docker-compose,unzip,git,time,bc,chromium,gedit,net-tools,java-17-openjdk-devel.x86_64,java-11-openjdk-devel.x86_64,pip,xorg-x11-xauth,webkit2gtk3 state=installed
+      ansible.builtin.shell: sudo dnf install -y docker-compose unzip git time bc chromium gedit net-tools java-17-openjdk-devel.x86_64 java-11-openjdk-devel.x86_64 pip xorg-x11-xauth webkit2gtk3
 
     - name: Install python dependencies
       tags: execute
@@ -54,7 +54,7 @@
     - name: Install docker
       tags: execute
       become: true
-      ansible.builtin.dnf: name=docker state=installed
+      ansible.builtin.shell: dnf install -y docker
 
     - name: Start and enable docker
       tags: execute
@@ -145,9 +145,7 @@
     - name: Start Elastic APM
       become: true
       tags: execute
-      community.docker.docker_compose:
-        project_src: elastic-apm
-        state: present
+      ansible.builtin.shell: docker compose -f elastic-apm/docker-compose.yml up -d
 
     - name: Download elastic-apm-agent
       tags: execute
@@ -219,24 +217,8 @@
 
     - name: Run Webtop
       tags: execute
-      community.docker.docker_container:
-        name: webtop
-        image: lscr.io/linuxserver/webtop:fedora-xfce-01b301b8-ls193
-        state: started
-        env:
-          PUID: "1000"
-          PGID: "1000"
-          TZ: "Europe/Vienna"
-          SUBFOLDER: "/"
-          KEYBOARD: "de-de-qwertz"
-        volumes:
-          - /home/{{ linux_user }}/webtop:/config
-          - /var/run/docker.sock:/var/run/docker.sock
-          - /:/host
-        security_opts:
-          - "seccomp:unconfined"
-        shm_size: 1G
-        network_mode: host
+      become: true
+      ansible.builtin.shell: docker run -d --name webtop --env PUID=1000 --env PGID=1000 --env TZ=Europe/Vienna --env SUBFOLDER=/ --env KEYBOARD=de-de-qwertz --volume /home/fedora/webtop:/config --volume /var/run/docker.sock:/var/run/docker.sock --volume /:/host --security-opt seccomp=unconfined --shm-size=1G --network host lscr.io/linuxserver/webtop:fedora-xfce-01b301b8-ls193
 
     - name: Change Password in Webtop
       tags: execute
