@@ -14,25 +14,31 @@ https://gepardec.github.io/train/[Github Pages] liefert die Dokumentation.
 Ein passender ami_name kann in https://eu-central-1.console.aws.amazon.com/ec2/home?region=eu-central-1#Images:visibility=public-images;search=:fedora;v=3;$case=tags:false%5C,client:false;$regex=tags:false%5C,client:false[aws] gefunden werden. Achtung wahrscheinlich muss auch ami_owners angepasst werden.
 
 
-=== Erstellen der AWS Rechner
+=== Installation
+Zuerst müssen die AWS Resourcen erstellt werden:
 [source,shell]
 ----
 podman run --rm -it -v $HOME/.aws:/root/.aws:ro -v $(pwd)/:/opt/train/workdir ghcr.io/gepardec/train:latest apply
 ----
+Danach können die Maschinen konfiguriert werden:
+[source,shell]
+----
+ansible-galaxy collection install -r requirements.yml
+ansible-playbook -i troubleshooting-workshop/inventory --tags execute playbook.yaml --start-at-task="Disable SELinux"
+----
 
-=== Destroy AWS Rechner
+=== Verbinden mit Weptop
+In der Datei `troubleshooting-workshop/readme.txt` stehen die Verbindungsdaten zu Webtop.
+
+=== Deinstallation und Cleanup
+AWS Resourcen löschen:
 [source,shell]
 ----
 podman run --rm -it -v $HOME/.aws:/root/.aws:ro -v $(pwd)/:/opt/train/workdir ghcr.io/gepardec/train:latest destroy
 ----
+Cleanup Lokal:
 
-== Konfigurieren der Rechner mit Ansible
 [source,shell]
 ----
-ansible-galaxy collection install -r requirements.yml
-ansible-playbook -i troubleshooting-workshop/inventory --tags execute playbook.yaml
+rm -r troubleshooting-workshop
 ----
-
-== Verbinden mit Webtop
-
-Auf Port 3000 jedes Rechners läuft ein Web-GUI z.B: http://3.68.193.54:3000/. Siehe Datei `inventory` für IP-Adressen
