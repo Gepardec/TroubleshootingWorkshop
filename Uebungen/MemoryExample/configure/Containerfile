@@ -1,0 +1,9 @@
+FROM eclipse-temurin:17-jre
+
+ENV LANGUAGE='en_US:en'
+
+COPY memory-leak-demo-1.0.0-SNAPSHOT-runner.jar /deployments/app.jar
+
+EXPOSE 8080
+
+ENTRYPOINT ["java"]
