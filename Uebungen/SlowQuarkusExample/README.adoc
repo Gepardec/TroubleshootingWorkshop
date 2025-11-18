@@ -2,19 +2,17 @@
 
 Kunden beschweren sich immer wieder wegen langen Wartezeiten.
 Diese beschwerden häufen sich um die Mittagszeit herum, wo in der Applikation am meisten los ist.
-In den Logs sehen wir allerdings, dass die Antwortzeit gleich bleibt.
+In den Logs sehen wir allerdings, dass die Antwortzeit gleich bleibt. Logfiles sind unter `configure/logs/` zu finden.
 
 == Schritte zum Reproduzieren
 
 [source,shell]
 ----
-java -jar configure/slow-quarkus-example-1.0.0-SNAPSHOT-runner.jar &
-sleep 2
+./deploy.sh
 ./run.sh
 ----
 
 == Applikation stoppen
-
 [source,shell]
 ----
 pkill -f slow-quarkus-example

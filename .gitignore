@@ -2,3 +2,5 @@
 /Schulungsumgebung/collections/
 /Schulungsumgebung/troubleshooting-workshop/
 /Uebungen/BlockExample/jaxrs-ws/target/
+/Uebungen/SlowQuarkusExample/configure/config/application.properties
+/Uebungen/SlowQuarkusExample/configure/logs/application.log*

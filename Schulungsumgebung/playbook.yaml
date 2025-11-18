@@ -135,6 +135,21 @@
         - "{{ ansible_env.HOME }}/TroubleshootingWorkshop/Uebungen/BlockExample/jaxrs-ws"
         - "{{ ansible_env.HOME }}/TroubleshootingWorkshop/Uebungen/MemoryExample/memory-leak-demo"
 
+    - name: add application.properties for SlowQuarkusExample
+      tags: execute
+      ansible.builtin.copy:
+        dest: "{{ ansible_env.HOME }}/TroubleshootingWorkshop/Uebungen/SlowQuarkusExample/configure/config/application.properties"
+        mode: 0600
+        content: |
+          # Quarkus HTTP configuration
+          quarkus.http.port=8080
+          quarkus.thread-pool.max-threads=12
+          quarkus.log.level=INFO
+          quarkus.log.console.enable=false
+          quarkus.log.file.enabled=true
+          quarkus.log.file.path=logs/application.log
+          quarkus.log.file.format=%d{yyyy-MM-dd HH:mm:ss} %-5p [%c] (%t) %s%e%n
+
     - name: Copy Elastic APM File
       tags: execute
       ansible.builtin.template:

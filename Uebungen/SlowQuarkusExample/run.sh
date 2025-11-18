@@ -4,14 +4,10 @@
 MAX_REQUESTS=${1:-1000}
 DELAY=${2:-0.15}  # Delay between starting each request (in seconds)
 
-echo "Starting gradual load test..."
-echo "Ramping up from 1 to $MAX_REQUESTS concurrent requests"
-echo "Delay between requests: ${DELAY}s"
-echo "Each request will take ~5 seconds to complete"
-echo "Watch for requests starting to queue if thread pool is too small"
-echo ""
-
 request_counter=0
+
+# short wait
+sleep 2
 
 # Send requests gradually (non-blocking)
 for i in $(seq 1 $MAX_REQUESTS); do
