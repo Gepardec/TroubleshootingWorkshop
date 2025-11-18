@@ -6,6 +6,9 @@ echo ""
 
 counter=1
 
+#short wait
+sleep 2
+
 while true; do
     echo "[$counter] Triggering leak endpoint..."
     response=$(curl -s http://localhost:8080/leak)

@@ -8,8 +8,7 @@ Die Probleme treten besonders auf, wenn der `/leak` Endpoint häufig aufgerufen 
 
 [source,shell]
 ----
-java -Xmx100m -jar configure/memory-leak-demo-1.0.0-SNAPSHOT-runner.jar &
-sleep 2
+./deploy.sh
 ./run.sh
 ----
 
