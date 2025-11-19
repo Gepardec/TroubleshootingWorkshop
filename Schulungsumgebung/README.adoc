@@ -11,7 +11,7 @@ Danach wird ansible verwendet, um die VMs für das Training einzurichten.
 Für den Aufbau der Schulungsumgebung gibt es ein eigenes https://github.com/Gepardec/train[Git Repository] und https://github.com/Gepardec/train/pkgs/container/train[Images] welches Terraform verwendet.
 https://gepardec.github.io/train/[Github Pages] liefert die Dokumentation.
 
-Ein passender ami_name kann in https://eu-central-1.console.aws.amazon.com/ec2/home?region=eu-central-1#Images:visibility=public-images;search=:fedora;v=3;$case=tags:false%5C,client:false;$regex=tags:false%5C,client:false[aws] gefunden werden. Achtung wahrscheinlich muss auch ami_owners angepasst werden.
+Ein passender ami_name kann in https://eu-central-1.console.aws.amazon.com/ec2/home?region=eu-central-1#Images:visibility=public-images;imageName=:Fedora-Cloud-Base-AmazonEC2.x86_64;v=3;$case=tags:false%5C,client:false;$regex=tags:false%5C,client:false[aws] gefunden werden.
 
 
 === Installation

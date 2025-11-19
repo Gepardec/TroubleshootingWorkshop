@@ -15,7 +15,12 @@
     - name: Install needed packages
       tags: execute
       become: true
-      ansible.builtin.shell: sudo dnf install -y docker-compose unzip git time bc chromium gedit net-tools java-17-openjdk-devel.x86_64 java-11-openjdk-devel.x86_64 pip xorg-x11-xauth webkit2gtk3
+      ansible.builtin.shell: sudo dnf install -y docker-compose unzip git time bc chromium gedit net-tools pip xorg-x11-xauth webkit2gtk3
+
+    - name: Install Java 11 and 17
+      tags: execute
+      become: true
+      ansible.builtin.shell: sudo dnf install -y --releasever=41 java-17-openjdk-devel java-11-openjdk-devel
 
     - name: Install python dependencies
       tags: execute
@@ -109,6 +114,11 @@
             Hostname localhost
             User "{{ linux_user }}"
             StrictHostKeyChecking no
+    # Derzeit funktionieren die Desktop Icons nicht. Fehlermeldung: Failed to run ... This feature requires a file manager service to be present (such as the one supplied by Thunar). -> Thunar ist aber installiert.
+    - name: Run Webtop
+      tags: execute
+      become: true
+      ansible.builtin.shell: docker run -d --rm --name webtop --env PUID=1000 --env PGID=1000 --env TZ=Europe/Vienna --env SUBFOLDER=/ --env KEYBOARD=de-de-qwertz --volume /home/fedora/webtop:/config --volume /var/run/docker.sock:/var/run/docker.sock --volume /:/host --security-opt seccomp=unconfined --shm-size=1G --network host lscr.io/linuxserver/webtop:fedora-xfce
 
     - name: Upload JBoss EAP Zip # muss vorher heruntergeladen werden von: https://access.redhat.com/jbossnetwork/restricted/listSoftware.html?downloadType=distributions&product=appplatform
       tags: execute
@@ -229,11 +239,6 @@
       ansible.builtin.lineinfile:
         path: "{{ ansible_env.HOME }}/.bashrc"
         line: "{{ item }}"
-
-    - name: Run Webtop
-      tags: execute
-      become: true
-      ansible.builtin.shell: docker run -d --name webtop --env PUID=1000 --env PGID=1000 --env TZ=Europe/Vienna --env SUBFOLDER=/ --env KEYBOARD=de-de-qwertz --volume /home/fedora/webtop:/config --volume /var/run/docker.sock:/var/run/docker.sock --volume /:/host --security-opt seccomp=unconfined --shm-size=1G --network host lscr.io/linuxserver/webtop:fedora-xfce-01b301b8-ls193
 
     - name: Change Password in Webtop
       tags: execute-not
